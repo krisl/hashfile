@@ -85,7 +85,7 @@ std::string makeHash(std::vector<char> const& data) {
 }
 
 /* calc hashes of stream in block size */
-std::deque<std::future<std::string>> calc_hashes(std::ifstream& in, int blocksize)
+void calc_hashes(std::ifstream& in, int blocksize, std::ostream& out)
 {
   std::vector<char>::size_type BLOCK_SIZE = blocksize * 1024 * 1024;
   std::deque<std::future<std::string>> tasks;
@@ -106,7 +106,10 @@ std::deque<std::future<std::string>> calc_hashes(std::ifstream& in, int blocksiz
       )
     );
   }
-  return tasks;
+
+  /* write results */
+  for (std::deque<std::future<std::string>>::iterator it = tasks.begin(); it != tasks.end(); ++it)
+    out << it->get() << '\n';
 }
 
 int main(int argc, char *argv[])
@@ -132,12 +135,8 @@ int main(int argc, char *argv[])
     throw std::system_error(errno, std::system_category(), "failed to open read file");
 
   /* do the work */
-  auto results = calc_hashes(is, args["blocksize"].as<int>());
   std::ostream& out = outfile.is_open() ? outfile : std::cout;
-
-  /* write results */
-  for (std::deque<std::future<std::string>>::iterator it = results.begin(); it != results.end(); ++it)
-    out << it->get() << '\n';
+  calc_hashes(is, args["blocksize"].as<int>(), out);
 
   return 0;
 }
