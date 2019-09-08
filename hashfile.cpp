@@ -85,10 +85,10 @@ std::string makeHash(std::vector<char> const& data) {
 }
 
 /* calc hashes of stream in block size */
-std::vector<std::future<std::string>> calc_hashes(std::ifstream& in, int blocksize)
+std::deque<std::future<std::string>> calc_hashes(std::ifstream& in, int blocksize)
 {
   std::vector<char>::size_type BLOCK_SIZE = blocksize * 1024 * 1024;
-  std::vector<std::future<std::string>> tasks;
+  std::deque<std::future<std::string>> tasks;
   /* read in file of block size */
   while (!in.eof() && !in.fail())
   {
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
   std::ostream& out = outfile.is_open() ? outfile : std::cout;
 
   /* write results */
-  for (std::vector<std::future<std::string>>::iterator it = results.begin(); it != results.end(); ++it)
+  for (std::deque<std::future<std::string>>::iterator it = results.begin(); it != results.end(); ++it)
     out << it->get() << '\n';
 
   return 0;
