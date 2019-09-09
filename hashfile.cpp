@@ -49,7 +49,10 @@ void calc_hashes(std::ifstream& in, int blocksize, std::ostream& out)
     );
 
     /* write results opportunistically */
-    if (tasks.front().wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+    while (
+      (tasks.size() > 0) &&
+      (tasks.front().wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+    ) {
       out << tasks.front().get() << '\n';
       tasks.pop_front();
     }
